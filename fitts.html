@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Закон Фиттса на ваших данных</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EDF0F3;
+  --surface: #FFFFFF;
+  --ink: #18202D;
+  --muted: #5B687B;
+  --line: #C9D1DB;
+  --accent: #1F4FE0;
+  --accent-ink: #FFFFFF;
+  --miss: #C4331F;
+  --dot: rgba(31, 79, 224, 0.22);
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161E;
+    --surface: #18202B;
+    --ink: #E4E9F0;
+    --muted: #94A1B4;
+    --line: #2E3947;
+    --accent: #6F93FF;
+    --accent-ink: #0C1220;
+    --miss: #FF6E5A;
+    --dot: rgba(111, 147, 255, 0.28);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161E;
+  --surface: #18202B;
+  --ink: #E4E9F0;
+  --muted: #94A1B4;
+  --line: #2E3947;
+  --accent: #6F93FF;
+  --accent-ink: #0C1220;
+  --miss: #FF6E5A;
+  --dot: rgba(111, 147, 255, 0.28);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Golos Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.num { font-variant-numeric: tabular-nums; }
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+}
+h1 {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 2.75rem 0 0.75rem;
+}
+p { margin: 0 0 1rem; max-width: 38rem; }
+.lead { font-size: 1.125rem; color: var(--ink); }
+.muted { color: var(--muted); }
+.formula-inline {
+  white-space: nowrap;
+  font-weight: 600;
+}
+ul.rules { padding-left: 1.2rem; margin: 0 0 2rem; max-width: 38rem; }
+ul.rules li { margin-bottom: 0.4rem; }
+
+.form {
+  display: grid;
+  gap: 1rem 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  margin-bottom: 1.75rem;
+}
+label.field { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 500; }
+label.field span.hint { font-weight: 400; color: var(--muted); font-size: 0.875rem; }
+input[type="text"], select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  min-height: 2.75rem;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-small { min-height: 2.5rem; padding: 0.45rem 0.9rem; font-weight: 500; }
+.btn:hover { filter: brightness(1.06); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.warning {
+  border-left: 3px solid var(--miss);
+  padding: 0.5rem 0 0.5rem 0.9rem;
+  margin: 0 0 1.5rem;
+  max-width: 38rem;
+}
+
+/* Test screen */
+#test {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--bg);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+#test.on { display: flex; }
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.bar .count { font-weight: 600; min-width: 7.5rem; }
+.progress {
+  flex: 1;
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); }
+#area {
+  position: relative;
+  flex: 1;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: crosshair;
+}
+#area canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#hint {
+  position: absolute;
+  left: 0; right: 0; top: 1rem;
+  text-align: center;
+  color: var(--muted);
+  pointer-events: none;
+  padding: 0 1rem;
+}
+
+/* Results */
+.formula {
+  font-size: clamp(1.8rem, 6.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0.5rem 0 1.25rem;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.formula .unit { font-size: 0.45em; font-weight: 500; color: var(--muted); margin-left: 0.3em; letter-spacing: 0; }
+.coefs { max-width: 38rem; margin-bottom: 1.5rem; }
+.coefs p { margin-bottom: 0.5rem; }
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 1.5rem 0;
+}
+.stat { flex: 1 1 10rem; padding: 0.9rem 1rem 0.9rem 0; }
+.stat + .stat { border-left: 1px solid var(--line); padding-left: 1rem; }
+.stat b { display: block; white-space: nowrap; font-size: 1.6rem; font-weight: 600; line-height: 1.2; }
+.stat span { color: var(--muted); font-size: 0.9rem; }
+.note { color: var(--muted); font-size: 0.95rem; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; }
+.chart-wrap svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.9rem; color: var(--muted); margin: 0.6rem 0 0; }
+.legend .sw { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 50%; vertical-align: -0.1rem; margin-right: 0.35rem; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+th, td { text-align: right; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 600; color: var(--muted); }
+details { margin-top: 1rem; }
+summary { cursor: pointer; color: var(--muted); }
+textarea {
+  width: 100%;
+  min-height: 10rem;
+  margin-top: 0.5rem;
+  font: 0.85rem/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6rem;
+}
+.status { min-height: 1.5rem; margin-top: 0.6rem; color: var(--muted); }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<main id="intro" class="page">
+  <h1>Закон Фиттса на ваших данных</h1>
+  <p class="lead">Вы будете кликать по целям, расположенным по кругу. Страница измерит время каждого движения и проверит, насколько хорошо оно описывается формулой <span class="formula-inline">MT = a + b · log₂(D/W + 1)</span>.</p>
+  <ul class="rules">
+    <li>Кликайте по синей цели как можно быстрее, но старайтесь не промахиваться.</li>
+    <li>Если промахнулись, не останавливайтесь: переходите к следующей цели, промах тоже записывается.</li>
+    <li id="durationText">9 серий по 13 кликов, это около 3–4 минут.</li>
+    <li>Поставьте масштаб страницы на 100% и не меняйте устройство ввода до конца теста.</li>
+  </ul>
+
+  <div class="form">
+    <label class="field">Имя или номер
+      <input type="text" id="participant" autocomplete="off" maxlength="40">
+      <span class="hint">Необязательно, попадёт в файл с данными</span>
+    </label>
+    <label class="field">Устройство ввода
+      <select id="device">
+        <option value="мышь">Мышь</option>
+        <option value="тачпад">Тачпад</option>
+        <option value="сенсорный экран">Сенсорный экран</option>
+        <option value="стилус">Стилус</option>
+        <option value="другое">Другое</option>
+      </select>
+    </label>
+    <label class="field">Целей в серии
+      <select id="ntargets">
+        <option value="13">13 (стандартный вариант)</option>
+        <option value="9">9 (быстрее)</option>
+      </select>
+    </label>
+  </div>
+
+  <p id="screenWarning" class="warning" hidden></p>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="startBtn">Начать тест</button>
+  </div>
+
+  <div id="historyBlock" hidden>
+    <h2>Прошлые прогоны в этом браузере</h2>
+    <div class="scroll"><table id="historyTable"></table></div>
+    <div class="actions" style="margin-top:0.75rem">
+      <button class="btn btn-secondary btn-small" id="clearHistory">Очистить историю</button>
+    </div>
+  </div>
+</main>
+
+<section id="test" aria-label="Тест">
+  <div class="bar">
+    <span class="count num" id="count">Серия 1 из 9</span>
+    <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+    <button class="btn btn-secondary btn-small" id="abortBtn">Прервать</button>
+  </div>
+  <div id="area">
+    <canvas id="canvas"></canvas>
+    <div id="hint">Кликните по синей цели, чтобы начать серию</div>
+  </div>
+</section>
+
+<main id="results" class="page" hidden>
+  <h1>Ваш результат</h1>
+  <p class="muted" id="resultMeta"></p>
+  <div class="formula num" id="formula"></div>
+  <div class="coefs" id="coefs"></div>
+
+  <div class="stats" id="stats"></div>
+  <p class="note" id="errorNote"></p>
+
+  <h2>Время движения и индекс трудности</h2>
+  <div class="chart-wrap" id="chart"></div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--dot)"></i>отдельные клики</span>
+    <span><i class="sw" style="background:var(--accent)"></i>среднее по серии</span>
+    <span><i class="sw" style="background:var(--ink);border-radius:1px;height:2px;width:1rem;vertical-align:0.2rem"></i>прямая регрессии</span>
+  </div>
+
+  <h2>По сериям</h2>
+  <div class="scroll"><table id="condTable"></table></div>
+  <p class="note" style="margin-top:0.75rem">D и W указаны в CSS-пикселях. W<sub>e</sub> и ID<sub>e</sub> — эффективная ширина и эффективный индекс трудности, рассчитанные по фактическому разбросу кликов (W<sub>e</sub> = 4,133 · SD). Первые два клика каждой серии считаются разминкой и не учитываются.</p>
+
+  <h2>Данные</h2>
+  <p>Файл содержит каждый клик: серию, D, W, ID, время, попадание и отклонение от центра цели. Его можно открыть в таблице или загрузить в Python для своего анализа.</p>
+  <div class="actions">
+    <button class="btn btn-primary" id="downloadBtn">Скачать данные (CSV)</button>
+    <button class="btn btn-secondary" id="againBtn">Пройти ещё раз</button>
+  </div>
+  <div class="status" id="dlStatus" role="status"></div>
+  <details>
+    <summary>Показать данные как текст</summary>
+    <textarea id="csvText" readonly></textarea>
+  </details>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const BASE_D = [150, 300, 600];
+  const BASE_W = [20, 40, 80];
+  const WARMUP = 2;
+  const BOUNCE_MS = 80;
+  const HISTORY_KEY = "fitts-lab-runs-v1";
+  const PREFS_KEY = "fitts-lab-prefs-v1";
+
+  const $ = (id) => document.getElementById(id);
+  const intro = $("intro"), test = $("test"), results = $("results");
+  const area = $("area"), canvas = $("canvas"), ctx = canvas.getContext("2d");
+  const hint = $("hint");
+
+  let downloads = null;
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then((d) => { downloads = d; }).catch(() => {});
+  }
+
+  // ---------- storage helpers ----------
+  function readJSON(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch (e) { return fallback; }
+  }
+  function writeJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  const prefs = readJSON(PREFS_KEY, {});
+  if (prefs.participant) $("participant").value = prefs.participant;
+  if (prefs.device) $("device").value = prefs.device;
+  if (prefs.ntargets) $("ntargets").value = prefs.ntargets;
+
+  function updateDuration() {
+    const n = +$("ntargets").value;
+    $("durationText").textContent = n === 13
+      ? "9 серий по 13 кликов, это около 3–4 минут."
+      : "9 серий по 9 кликов, это около 2–3 минут.";
+  }
+  $("ntargets").addEventListener("change", updateDuration);
+  updateDuration();
+
+  // ---------- screen size ----------
+  function availableSize() {
+    // Test area = viewport minus the top bar (~57px)
+    return Math.min(window.innerWidth, window.innerHeight - 60);
+  }
+  function scaleFactor() {
+    const need = Math.max(...BASE_D) + Math.max(...BASE_W) + 40;
+    return Math.min(1, availableSize() / need);
+  }
+  function checkScreen() {
+    const f = scaleFactor();
+    const w = $("screenWarning");
+    if (f < 1) {
+      w.hidden = false;
+      w.textContent = f < 0.5
+        ? "Окно слишком маленькое: цели будут очень мелкими. Разверните окно браузера на весь экран или откройте страницу на ноутбуке."
+        : "Окно меньше рекомендуемого, поэтому все расстояния и размеры будут уменьшены в одинаковой пропорции. Индексы трудности не изменятся, но для сравнения с другими лучше развернуть окно на весь экран.";
+    } else {
+      w.hidden = true;
+    }
+  }
+  window.addEventListener("resize", checkScreen);
+  checkScreen();
+
+  // ---------- experiment state ----------
+  let run = null;
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startRun() {
+    const participant = $("participant").value.trim();
+    const device = $("device").value;
+    const n = +$("ntargets").value;
+    writeJSON(PREFS_KEY, { participant, device, ntargets: n });
+
+    const conds = [];
+    BASE_D.forEach((D) => BASE_W.forEach((W) => conds.push({ D, W })));
+    run = {
+      participant, device, n,
+      conds: shuffle(conds),
+      ci: 0,
+      trials: [],
+      startedAt: new Date(),
+      pointerTypes: new Set()
+    };
+    intro.hidden = true;
+    results.hidden = true;
+    test.classList.add("on");
+    document.body.style.overflow = "hidden";
+    startCondition();
+  }
+
+  function startCondition() {
+    const f = scaleFactor();
+    const c = run.conds[run.ci];
+    const rect = area.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const D = c.D * f, W = c.W * f;
+    const cx = rect.width / 2, cy = rect.height / 2 + 12;
+    const n = run.n, R = D / 2;
+    const pos = [];
+    for (let i = 0; i < n; i++) {
+      const ang = -Math.PI / 2 + (2 * Math.PI * i) / n;
+      pos.push({ x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang) });
+    }
+    const step = (n + 1) / 2;
+    const seq = [];
+    for (let k = 0; k <= n; k++) seq.push((k * step) % n);
+
+    run.cur = {
+      Dnom: c.D, Wnom: c.W, D, W, f,
+      ID: Math.log2(c.D / c.W + 1),
+      pos, seq, k: 0, tPrev: 0, prevClick: null, flash: null
+    };
+    $("count").textContent = "Серия " + (run.ci + 1) + " из " + run.conds.length;
+    $("progressFill").style.width = (run.ci / run.conds.length * 100) + "%";
+    hint.textContent = run.ci === 0
+      ? "Кликните по синей цели, чтобы начать серию"
+      : "Серия " + (run.ci + 1) + ". Кликните по синей цели, чтобы начать";
+    hint.hidden = false;
+    draw();
+  }
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function draw() {
+    const cur = run.cur;
+    const rect = area.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    const accent = cssVar("--accent"), line = cssVar("--line"), miss = cssVar("--miss");
+    const target = cur.seq[Math.min(cur.k, cur.seq.length - 1)];
+    cur.pos.forEach((p, i) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, cur.W / 2, 0, Math.PI * 2);
+      if (i === target) {
+        ctx.fillStyle = accent;
+        ctx.fill();
+      } else {
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = line;
+        ctx.stroke();
+      }
+    });
+    if (cur.flash) {
+      ctx.beginPath();
+      ctx.arc(cur.flash.x, cur.flash.y, 7, 0, Math.PI * 2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = miss;
+      ctx.stroke();
+    }
+  }
+
+  function localPoint(e) {
+    const r = area.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  area.addEventListener("pointerdown", (e) => {
+    if (!run || !run.cur) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    const now = e.timeStamp;
+    const p = localPoint(e);
+    const cur = run.cur;
+    run.pointerTypes.add(e.pointerType || "unknown");
+
+    if (cur.k === 0) {
+      const t = cur.pos[cur.seq[0]];
+      if (Math.hypot(p.x - t.x, p.y - t.y) <= cur.W / 2) {
+        cur.tPrev = now;
+        cur.prevClick = p;
+        cur.k = 1;
+        hint.hidden = true;
+        cur.flash = null;
+        draw();
+      }
+      return;
+    }
+    if (now - cur.tPrev < BOUNCE_MS) return;
+
+    const to = cur.pos[cur.seq[cur.k]];
+    const from = cur.pos[cur.seq[cur.k - 1]];
+    const ux = to.x - from.x, uy = to.y - from.y;
+    const len = Math.hypot(ux, uy) || 1;
+    const nx = ux / len, ny = uy / len;
+    const dx = (p.x - to.x) * nx + (p.y - to.y) * ny;
+    const ae = (p.x - cur.prevClick.x) * nx + (p.y - cur.prevClick.y) * ny;
+    const hit = Math.hypot(p.x - to.x, p.y - to.y) <= cur.W / 2;
+
+    run.trials.push({
+      block: run.ci + 1,
+      D: cur.D, W: cur.W, Dnom: cur.Dnom, Wnom: cur.Wnom, ID: cur.ID,
+      trial: cur.k,
+      mt: now - cur.tPrev,
+      hit, dx, ae,
+      warmup: cur.k <= WARMUP,
+      pointer: e.pointerType || ""
+    });
+
+    cur.tPrev = now;
+    cur.prevClick = p;
+    cur.flash = hit ? null : p;
+    cur.k += 1;
+
+    if (cur.k > run.n) {
+      run.ci += 1;
+      if (run.ci >= run.conds.length) { finishRun(); return; }
+      startCondition();
+      return;
+    }
+    draw();
+  });
+
+  window.addEventListener("resize", () => {
+    if (run && run.cur && test.classList.contains("on")) {
+      // Geometry changed: drop the unfinished series and restart it
+      const block = run.ci + 1;
+      run.trials = run.trials.filter((t) => t.block !== block);
+      startCondition();
+    }
+  });
+
+  function abortRun() {
+    run = null;
+    test.classList.remove("on");
+    document.body.style.overflow = "";
+    intro.hidden = false;
+    renderHistory();
+    $("startBtn").focus();
+  }
+  $("abortBtn").addEventListener("click", abortRun);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && test.classList.contains("on")) abortRun();
+  });
+
+  let lastRun = null;
+
+  // ---------- analysis ----------
+  function mean(a) { return a.reduce((s, v) => s + v, 0) / a.length; }
+  function sd(a) {
+    if (a.length < 2) return 0;
+    const m = mean(a);
+    return Math.sqrt(a.reduce((s, v) => s + (v - m) * (v - m), 0) / (a.length - 1));
+  }
+  function linreg(xs, ys) {
+    const mx = mean(xs), my = mean(ys);
+    let sxx = 0, sxy = 0, sst = 0;
+    for (let i = 0; i < xs.length; i++) {
+      sxx += (xs[i] - mx) ** 2;
+      sxy += (xs[i] - mx) * (ys[i] - my);
+      sst += (ys[i] - my) ** 2;
+    }
+    const b = sxy / sxx, a = my - b * mx;
+    let ssr = 0;
+    for (let i = 0; i < xs.length; i++) ssr += (ys[i] - (a + b * xs[i])) ** 2;
+    return { a, b, r2: sst > 0 ? 1 - ssr / sst : 1 };
+  }
+
+  function analyze(r) {
+    const byBlock = new Map();
+    r.trials.forEach((t) => {
+      if (!byBlock.has(t.block)) byBlock.set(t.block, []);
+      byBlock.get(t.block).push(t);
+    });
+    let excluded = 0;
+    const conds = [];
+    byBlock.forEach((ts) => {
+      const counted = ts.filter((t) => !t.warmup);
+      const valid = counted.filter((t) => {
+        const ok = t.ae >= t.D / 2 && Math.abs(t.dx) <= 2 * t.W;
+        if (!ok) excluded++;
+        return ok;
+      });
+      if (!valid.length) return;
+      valid.forEach((t) => { t.used = true; });
+      const mts = valid.map((t) => t.mt);
+      const sdx = sd(valid.map((t) => t.dx));
+      const We = sdx > 0 ? 4.133 * sdx : ts[0].W;
+      const De = mean(valid.map((t) => t.ae));
+      const IDe = Math.log2(De / We + 1);
+      const MT = mean(mts);
+      const f = ts[0].D / ts[0].Dnom;
+      conds.push({
+        D: ts[0].Dnom, W: ts[0].Wnom, ID: ts[0].ID,
+        MT, n: valid.length,
+        err: counted.filter((t) => !t.hit).length / counted.length,
+        We: We / f, IDe,
+        TP: IDe / (MT / 1000)
+      });
+    });
+    conds.sort((x, y) => x.ID - y.ID || x.D - y.D);
+    const reg = linreg(conds.map((c) => c.ID), conds.map((c) => c.MT));
+    const counted = r.trials.filter((t) => !t.warmup);
+    return {
+      conds, reg, excluded,
+      TP: mean(conds.map((c) => c.TP)),
+      err: counted.filter((t) => !t.hit).length / counted.length
+    };
+  }
+
+  // ---------- formatting ----------
+  const fmt = (v, d) => v.toLocaleString("ru-RU", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  function finishRun() {
+    test.classList.remove("on");
+    document.body.style.overflow = "";
+    const res = analyze(run);
+    lastRun = run;
+    renderResults(run, res);
+    const hist = readJSON(HISTORY_KEY, []);
+    hist.unshift({
+      date: run.startedAt.toISOString(),
+      participant: run.participant,
+      device: run.device,
+      a: res.reg.a, b: res.reg.b, r2: res.reg.r2, tp: res.TP, err: res.err
+    });
+    writeJSON(HISTORY_KEY, hist.slice(0, 30));
+    run.cur = null;
+  }
+
+  function renderResults(r, res) {
+    const { a, b, r2 } = res.reg;
+    const date = r.startedAt.toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    $("resultMeta").textContent = [r.participant || null, r.device, date].filter(Boolean).join(", ");
+
+    const sgn = (v) => (v < 0 ? "−" : "") + fmt(Math.abs(v), 0);
+    $("formula").innerHTML = "MT = " + sgn(a) + (b < 0 ? " − " : " + ") + fmt(Math.abs(b), 0) + " · ID<span class=\"unit\">мс</span>";
+
+    $("coefs").innerHTML =
+      "<p><b>a = " + sgn(a) + " мс</b>: постоянная часть, которая не зависит от трудности цели. В неё входят реакция, начало движения и само нажатие.</p>" +
+      "<p><b>b = " + sgn(b) + " мс на бит</b>: сколько времени добавляет каждый бит трудности. Удвоить расстояние или вдвое уменьшить цель — это примерно плюс один бит.</p>" +
+      (b <= 0 ? "<p class=\"note\">Наклон получился нулевым или отрицательным: время почти не зависит от трудности цели. Так бывает, если двигаться в одном ритме, не глядя на цели. Попробуйте пройти тест ещё раз в обычном темпе.</p>" : "") +
+      (a < 0 ? "<p class=\"note\">Отрицательное a иногда получается на малом числе точек и ничего страшного не значит: регрессия просто продолжает прямую за пределы измеренного диапазона.</p>" : "");
+
+    const stats = [
+      [fmt(r2, 3), "R², доля разброса средних, объяснённая моделью"],
+      [b > 0 ? fmt(1000 / b, 1) + " бит/с" : "—", "1/b, обратный наклон"],
+      [fmt(res.TP, 1) + " бит/с", "пропускная способность по эффективным ID"],
+      [fmt(res.err * 100, 1) + "%", "промахов"]
+    ];
+    $("stats").innerHTML = stats.map((s) => '<div class="stat"><b class="num">' + s[0] + "</b><span>" + s[1] + "</span></div>").join("");
+
+    let note = "";
+    if (res.err > 0.1) note = "Промахов больше 10%: похоже, вы двигались быстрее, чем позволяет точность. Обычно их около 4%. ";
+    else if (res.err < 0.01) note = "Почти без промахов: возможно, вы двигались осторожнее, чем нужно. Эффективная пропускная способность это учитывает. ";
+    if (res.excluded > 0) note += "Исключено случайных кликов: " + res.excluded + " (слишком короткое движение или клик далеко от цели).";
+    $("errorNote").textContent = note;
+    $("errorNote").hidden = !note;
+
+    renderChart(r, res);
+
+    let rows = "<thead><tr><th>Серия</th><th>D</th><th>W</th><th>ID, бит</th><th>MT, мс</th><th>Промахи</th><th>W<sub>e</sub></th><th>ID<sub>e</sub>, бит</th><th>TP, бит/с</th></tr></thead><tbody>";
+    res.conds.forEach((c, i) => {
+      rows += "<tr><td>" + (i + 1) + "</td><td>" + c.D + "</td><td>" + c.W + "</td><td>" + fmt(c.ID, 2) + "</td><td>" + fmt(c.MT, 0) +
+        "</td><td>" + fmt(c.err * 100, 0) + "%</td><td>" + fmt(c.We, 1) + "</td><td>" + fmt(c.IDe, 2) + "</td><td>" + fmt(c.TP, 1) + "</td></tr>";
+    });
+    $("condTable").innerHTML = rows + "</tbody>";
+
+    $("csvText").value = buildCSV(r);
+    $("dlStatus").textContent = "";
+    results.hidden = false;
+    window.scrollTo(0, 0);
+    $("downloadBtn").focus({ preventScroll: true });
+  }
+
+  function niceStep(range, ticks) {
+    const raw = range / ticks;
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const m = raw / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  }
+
+  function renderChart(r, res) {
+    const W = 640, H = 380, L = 62, Rm = 18, T = 18, B = 52;
+    const pw = W - L - Rm, ph = H - T - B;
+    const used = r.trials.filter((t) => t.used);
+    const mts = used.map((t) => t.mt).sort((x, y) => x - y);
+    const p95 = mts[Math.floor(mts.length * 0.95)] || 0;
+    const maxMean = Math.max(...res.conds.map((c) => c.MT));
+    const yStep = niceStep(Math.max(p95, maxMean) * 1.1, 5);
+    const yMax = Math.ceil(Math.max(p95, maxMean) * 1.1 / yStep) * yStep;
+    const xMax = Math.ceil(Math.max(...res.conds.map((c) => c.ID)) + 0.3);
+    const X = (v) => L + (v / xMax) * pw;
+    const Y = (v) => T + ph - (v / yMax) * ph;
+
+    let s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Зависимость времени движения от индекса трудности">';
+    s += '<defs><clipPath id="plot"><rect x="' + L + '" y="' + T + '" width="' + pw + '" height="' + ph + '"/></clipPath></defs>';
+    for (let v = 0; v <= yMax + 1e-9; v += yStep) {
+      s += '<line x1="' + L + '" x2="' + (L + pw) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--line)" stroke-width="1"/>';
+      s += '<text x="' + (L - 8) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="12" fill="var(--muted)">' + fmt(v, 0) + "</text>";
+    }
+    for (let v = 0; v <= xMax; v += 1) {
+      s += '<line x1="' + X(v) + '" x2="' + X(v) + '" y1="' + (T + ph) + '" y2="' + (T + ph + 5) + '" stroke="var(--muted)"/>';
+      s += '<text x="' + X(v) + '" y="' + (T + ph + 20) + '" text-anchor="middle" font-size="12" fill="var(--muted)">' + v + "</text>";
+    }
+    s += '<text x="' + (L + pw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="13" fill="var(--ink)">ID = log₂(D/W + 1), бит</text>';
+    s += '<text transform="translate(16 ' + (T + ph / 2) + ') rotate(-90)" text-anchor="middle" font-size="13" fill="var(--ink)">MT, мс</text>';
+    s += '<g clip-path="url(#plot)">';
+    used.forEach((t) => {
+      const jitter = (Math.random() - 0.5) * 0.08;
+      s += '<circle cx="' + X(t.ID + jitter).toFixed(1) + '" cy="' + Y(t.mt).toFixed(1) + '" r="3" fill="var(--dot)"/>';
+    });
+    const { a, b } = res.reg;
+    s += '<line x1="' + X(0) + '" y1="' + Y(a) + '" x2="' + X(xMax) + '" y2="' + Y(a + b * xMax) + '" stroke="var(--ink)" stroke-width="2"/>';
+    res.conds.forEach((c) => {
+      s += '<circle cx="' + X(c.ID) + '" cy="' + Y(c.MT) + '" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"><title>D=' + c.D + ", W=" + c.W + ", ID=" + fmt(c.ID, 2) + ", MT=" + fmt(c.MT, 0) + " мс</title></circle>";
+    });
+    s += "</g>";
+    s += '<line x1="' + L + '" x2="' + L + '" y1="' + T + '" y2="' + (T + ph) + '" stroke="var(--muted)"/>';
+    s += '<line x1="' + L + '" x2="' + (L + pw) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '" stroke="var(--muted)"/>';
+    s += "</svg>";
+    $("chart").innerHTML = s;
+  }
+
+  // ---------- CSV ----------
+  function csvCell(v) {
+    const s = String(v);
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function buildCSV(r) {
+    const head = ["participant", "device", "pointer", "date", "block", "D_nominal", "W_nominal", "scale", "ID", "trial", "warmup", "used", "MT_ms", "hit", "dx_px", "ae_px"];
+    const lines = [head.join(",")];
+    const date = r.startedAt.toISOString();
+    r.trials.forEach((t) => {
+      lines.push([
+        csvCell(r.participant), csvCell(r.device), t.pointer, date, t.block, t.Dnom, t.Wnom,
+        (t.D / t.Dnom).toFixed(3), t.ID.toFixed(4), t.trial, t.warmup ? 1 : 0, t.used ? 1 : 0,
+        t.mt.toFixed(1), t.hit ? 1 : 0, t.dx.toFixed(2), t.ae.toFixed(2)
+      ].join(","));
+    });
+    return lines.join("\n") + "\n";
+  }
+  function fileName(r) {
+    const who = (r.participant || "participant").replace(/[^\p{L}\p{N}_-]+/gu, "_");
+    const d = r.startedAt;
+    const pad = (n) => String(n).padStart(2, "0");
+    return "fitts_" + who + "_" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes()) + ".csv";
+  }
+
+
+  $("downloadBtn").addEventListener("click", async () => {
+    const r = lastRun;
+    if (!r) return;
+    const status = $("dlStatus");
+    const data = buildCSV(r);
+    const name = fileName(r);
+    if (downloads) {
+      try {
+        await downloads.save({ filename: name, data });
+        status.textContent = "Файл сохранён.";
+      } catch (err) {
+        const code = err && err.code;
+        if (code === "declined") status.textContent = "Сохранение отменено.";
+        else if (code === "rate_limited") status.textContent = "Окно сохранения уже открыто. Завершите его и попробуйте снова.";
+        else status.textContent = "Сохранить файл здесь не получилось. Раскройте «Показать данные как текст» ниже и скопируйте данные.";
+      }
+      return;
+    }
+    try {
+      const blob = new Blob([data], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      status.textContent = "Если загрузка не началась, раскройте «Показать данные как текст» ниже и скопируйте данные.";
+    } catch (e) {
+      status.textContent = "Сохранить файл здесь не получилось. Раскройте «Показать данные как текст» ниже и скопируйте данные.";
+    }
+  });
+
+  $("againBtn").addEventListener("click", () => {
+    results.hidden = true;
+    intro.hidden = false;
+    renderHistory();
+    checkScreen();
+    window.scrollTo(0, 0);
+  });
+
+  // ---------- history ----------
+  function renderHistory() {
+    const hist = readJSON(HISTORY_KEY, []);
+    $("historyBlock").hidden = hist.length === 0;
+    if (!hist.length) return;
+    let rows = "<thead><tr><th>Дата</th><th>Устройство</th><th>a, мс</th><th>b, мс/бит</th><th>R²</th><th>TP, бит/с</th><th>Промахи</th></tr></thead><tbody>";
+    hist.forEach((h) => {
+      const d = new Date(h.date).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+      rows += "<tr><td>" + d + (h.participant ? ", " + escapeHTML(h.participant) : "") + "</td><td>" + escapeHTML(h.device) + "</td><td>" + fmt(h.a, 0) +
+        "</td><td>" + fmt(h.b, 0) + "</td><td>" + fmt(h.r2, 3) + "</td><td>" + fmt(h.tp, 1) + "</td><td>" + fmt(h.err * 100, 1) + "%</td></tr>";
+    });
+    $("historyTable").innerHTML = rows + "</tbody>";
+  }
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  $("clearHistory").addEventListener("click", () => {
+    try { localStorage.removeItem(HISTORY_KEY); } catch (e) {}
+    renderHistory();
+  });
+
+  $("startBtn").addEventListener("click", startRun);
+  renderHistory();
+})();
+</script>
+</body>
+</html>
