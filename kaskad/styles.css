@@ -1,0 +1,78 @@
+@layer reset, base, layout, components, utilities;
+
+@layer base {
+  :root {
+    --ink: #1b1d26;
+    --muted: #5d6275;
+    --paper: #f3f3f6;
+    --surface: #ffffff;
+    --line: #dcdde5;
+    --accent: #3c37d6;
+    --accent-ink: #ffffff;
+  }
+
+  body {
+    font-family: system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.5;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .nav a {
+    text-decoration: none;
+  }
+
+  .nav a:hover {
+    text-decoration: underline;
+  }
+
+  .nav a[aria-current="page"] {
+    color: var(--accent);
+  }
+
+  .nav li + li::before {
+    content: "/";
+    margin-inline-end: 0.75rem;
+    color: var(--muted);
+  }
+
+  .hero > :first-child {
+    color: var(--muted);
+  }
+
+  .hero a {
+    color: var(--accent);
+  }
+
+  :is(h1, h2, h3) {
+    line-height: 1.15;
+  }
+}
+
+@layer components {
+  .btn {
+    display: inline-block;
+    padding: 0.7em 1.3em;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .btn--primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink);
+  }
+}
