@@ -28,36 +28,111 @@
           <a class="btn btn--ghost" href="#program">Программа</a>
         </div>
       </section>
-      <section class="program flow">
-        <article class="talk">
-          <div class="talk__cover" style="--hue: 250"></div>
-          <div class="talk__body">
-            <p class="talk__time">10:00, Конференц-зал</p>
-            <h3 class="talk__title">CSS: универсальное решение проблем</h3>
-            <p class="talk__desc">
-              Как мы устранили все !imporatnt и что сломалось по дороге
-            </p>
-            <p class="talk__footer">
-              <span class="tag tag--new">Новое</span
-              ><a href="#" class="btn btn--ghost">В избранное</a>
-            </p>
-          </div>
-        </article>
-        <article class="talk">
-          <div class="talk__cover" style="--hue: 160"></div>
-          <div class="talk__body">
-            <p class="talk__time">11:30, Большой зал</p>
-            <h3 class="talk__title">Контейнерные запросы</h3>
-            <p class="talk__desc">
-              Одна карточка вместо четырех и как много времени это сэкономило
-            </p>
-            <p class="talk__footer">
-              <span class="tag">Раскладка</span
-              ><a href="#" class="btn btn--ghost">В избранное</a>
-            </p>
-          </div>
-        </article>
+      <div class="layout">
+        <section class="program flow">
+          <article class="talk">
+            <div class="talk__cover" style="--hue: 250"></div>
+            <div class="talk__body">
+              <p class="talk__time">10:00, Конференц-зал</p>
+              <h3 class="talk__title">CSS: универсальное решение проблем</h3>
+              <p class="talk__desc">
+                Как мы устранили все !imporatnt и что сломалось по дороге
+              </p>
+              <div class="talk__footer">
+                <span class="tag tag--new">Новое</span
+                ><a href="#" class="btn btn--ghost">В избранное</a>
+              </div>
+            </div>
+          </article>
+          <article class="talk">
+            <div class="talk__cover" style="--hue: 160"></div>
+            <div class="talk__body">
+              <p class="talk__time">11:30, Большой зал</p>
+              <h3 class="talk__title">Контейнерные запросы</h3>
+              <p class="talk__desc">
+                Одна карточка вместо четырех и как много времени это сэкономило
+              </p>
+              <p class="talk__footer">
+                <span class="tag">Раскладка</span
+                ><a href="#" class="btn btn--ghost">В избранное</a>
+              </p>
+            </div>
+          </article>
+        </section>
+        <aside class="sidebar flow">
+          <h2>Сейчас в эфире</h2>
+          <p class="note">Трансляция бесплатна после регистрации</p>
+          <article class="talk">
+            <div class="talk__cover" style="--hue: 250"></div>
+            <div class="talk__body">
+              <p class="talk__time">10:00, Конференц-зал</p>
+              <h3 class="talk__title">CSS: универсальное решение проблем</h3>
+              <p class="talk__desc">
+                Как мы устранили все !imporatnt и что сломалось по дороге
+              </p>
+              <div class="talk__footer">
+                <span class="tag tag--new">Новое</span
+                ><a href="#" class="btn btn--ghost">Смотреть</a>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </div>
+      <section class="speakers flow">
+        <h2>Спикеры</h2>
+        <ul class="speakers_container">
+          <li class="speaker">
+            <h3>Петр Петров</h3>
+            <p>Фронтенд</p>
+          </li>
+          <li class="speaker">
+            <h3>Иван Иванов</h3>
+            <p>Анимации</p>
+          </li>
+          <li class="speaker">
+            <h3>Егор Егоров</h3>
+            <p>Дизайн</p>
+          </li>
+          <li class="speaker">
+            <h3>Петр Петров</h3>
+            <p>Фронтенд</p>
+          </li>
+          <li class="speaker">
+            <h3>Иван Иванов</h3>
+            <p>Анимации</p>
+          </li>
+          <li class="speaker">
+            <h3>Егор Егоров</h3>
+            <p>Дизайн</p>
+          </li>
+        </ul>
+      </section>
+      <section class="tickets flow">
+        <h2>Билеты</h2>
+        <div class="tickets__container">
+          <article class="ticket">
+            <h3>Онлайн</h3>
+            <p class="ticket__price">4 000 руб</p>
+            <p>Трасляция докладов</p>
+            <a href="" class="btn btn--ghost">Выбрать</a>
+          </article>
+          <article class="ticket">
+            <h3>Офлайн</h3>
+            <p class="ticket__price">6 000 руб</p>
+            <p>Присутствие в зале все 2 дня + запись докладов</p>
+            <a href="" class="btn btn--ghost">Выбрать</a>
+          </article>
+          <article class="ticket">
+            <h3>Воркшоп</h3>
+            <p class="ticket__price">10 000 руб</p>
+            <p>Все из билета "Офлайн" + воркшоп на 4 часа</p>
+            <a href="" class="btn btn--primary">Выбрать</a>
+          </article>
+        </div>
       </section>
     </main>
+    <footer class="site-footer">
+      <p>Каскад 26</p>
+    </footer>
   </body>
 </html>
