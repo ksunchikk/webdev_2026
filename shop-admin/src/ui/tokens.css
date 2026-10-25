@@ -1,0 +1,42 @@
+/* Дизайн-токены: все цвета, отступы и скругления проекта */
+:root {
+  /* Основной цвет: кнопки, ссылки, включённый переключатель */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-soft: #eff6ff;
+
+  /* Опасное действие и статус «Нет» */
+  --color-danger: #c2410c;
+  --color-danger-hover: #a3360a;
+  --color-danger-soft: #ffedd5;
+  --color-danger-text: #9a3412;
+
+  /* Статусы для Badge: светлый фон и тёмный текст */
+  --color-success-soft: #dcfce7;
+  --color-success-text: #166534;
+  --color-warning-soft: #fef9c3;
+  --color-warning-text: #854d0e;
+  --color-neutral-soft: #f3f4f6;
+
+  /* Поверхности, текст, рамки */
+  --color-surface: #ffffff;
+  --color-surface-hover: #f3f4f6;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --color-border: #d1d5db;
+  --color-track: #9ca3af;
+  --color-focus: #2563eb;
+
+  /* Отступы */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  /* Скругления и шрифт */
+  --radius: 8px;
+  --radius-full: 999px;
+  --font-sm: 13px;
+  --font-md: 14px;
+}
