@@ -1,0 +1,31 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* Тоны: светлый фон и тёмный текст того же цвета */
+.default {
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+}
+
+.success {
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+}
+
+.warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+}
+
+.error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}

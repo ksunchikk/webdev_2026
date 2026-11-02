@@ -1,0 +1,114 @@
+/* Страница */
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+/* Строка с фильтрами над таблицей */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Счётчик «Показано: 4 из 6» */
+.count {
+  margin: 0 0 var(--space-3);
+  color: var(--color-muted);
+}
+
+/* Поле поиска и выпадающий список (занятие 2) */
+.input,
+.select {
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* Таблица. Обёртка даёт горизонтальную прокрутку на узком экране */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--color-surface-hover);
+}
+
+/* Числовые колонки: по правому краю, цифры одинаковой ширины */
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Старые данные, пока грузятся новые (занятие 2) */
+.stale {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+/* Редактор цены в ячейке таблицы (занятие 2) */
+.editor {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.priceInput {
+  width: 96px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+  text-align: right;
+}
+
+/* Сообщение об ошибке */
+.alert {
+  margin: var(--space-1) 0 0;
+  color: var(--color-danger);
+  font-size: var(--font-sm);
+  white-space: normal;
+}
+
+/* Пагинация (занятие 2) */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}

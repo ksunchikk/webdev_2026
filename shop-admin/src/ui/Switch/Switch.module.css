@@ -1,0 +1,51 @@
+/* Подпись вместе с переключателем: клик по тексту тоже переключает */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-md);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Дорожка */
+.root {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-track);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.root[data-checked] {
+  background: var(--color-primary);
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Бегунок */
+.thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  transition: transform 0.15s;
+}
+
+.thumb[data-checked] {
+  transform: translateX(16px);
+}
