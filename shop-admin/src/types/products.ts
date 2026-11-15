@@ -2,9 +2,9 @@ export type Product = {
   id: number;
   title: string;
   category: string;
-  price: number;
+  price?: number;
   rating: number;
-  stock: number;
+  stock?: number;
 };
 
 export const products: Product[] = [

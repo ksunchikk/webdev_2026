@@ -8,7 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = "https://dummyjson.com";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, init);

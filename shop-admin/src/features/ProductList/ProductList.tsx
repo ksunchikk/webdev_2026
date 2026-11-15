@@ -36,7 +36,7 @@ export function ProductList({ items }: ProductListProps) {
           const stockValue = product.price * product.stock;
 
           return (
-            <tr>
+            <tr key={product.id}>
               <td>{product.title}</td>
               <td>{product.category}</td>
               <td className={styles.num}>{formatter(product.price)}</td>
